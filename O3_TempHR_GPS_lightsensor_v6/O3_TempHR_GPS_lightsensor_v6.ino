@@ -17,14 +17,18 @@ byte o3Byte[2];
 byte tempHRByte[4];
 
 // LoRa settings :
-#define pinRST 2
+#define pinRST 4
 #define LoRaRX 6
 #define LoRaTX 7
 SoftwareSerial loraSerial(LoRaRX, LoRaTX);
 #define freqPlan TTN_FP_EU868
+/*
 const char *devAddr = "26011974";
 const char *nwkSKey = "0FD4DF821371856F6690C46E428FA4A5";
-const char *appSKey = "6EDCCF62E148D4CB5070040ADAA6CA66";
+const char *appSKey = "6EDCCF62E148D4CB5070040ADAA6CA66";*/
+  const char *devAddr = "f9e02317";
+  const char *nwkSKey = "3de6ac4540fca46c0c4a871ff583f30b";
+  const char *appSKey = "17d6b299b3f0e5db8fcbca3205ccd588";
 TheThingsNetwork ttn(loraSerial, Serial, freqPlan);
 
 // Temperature and Humidity sensor connexion

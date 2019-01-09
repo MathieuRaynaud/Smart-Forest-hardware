@@ -63,7 +63,7 @@ byte idx1, idx2, idx3, idx4, idx5, idx6, idx7, idx8, idx9, idx10;
 
 #define lightSensor A0    // select the input pin for the potentiometer
 int lightSensorValue = 0; //declare the variable to store the value read by the ADC
-byte userOrder = 1;    // User input order on the serial command
+byte userOrder = 5;    // User input order on the serial command
 
 
 void setup() {
@@ -257,7 +257,7 @@ void loop() {
     o3Byte[1] = H2S;
     o3Byte[0] = H2S >> 8;
 
-    userOrder = 1;
+    userOrder = 5;
     o3Serial.end();
     digitalWrite(ledPIN,HIGH);
     delay(500);
@@ -288,7 +288,8 @@ void loop() {
     data[8] = o3Byte[1];
     ttn.sendBytes(data, sizeof(data));
 
-    userOrder = 0;
+    userOrder = 5;
+    delay(5000);
     loraSerial.end();
 
   }

@@ -50,7 +50,7 @@ int userOrder = 1;    // User input order on the serial command
 // Sleep timer
 volatile bool watchdogActivated = false;
 int sleepIterations = 0;
-#define MAX_SLEEP_ITERATIONS 225
+#define MAX_SLEEP_ITERATIONS 2
 
 // Define watchdog timer interrupt.
 ISR(WDT_vect)

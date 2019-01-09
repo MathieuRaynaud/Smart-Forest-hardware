@@ -169,8 +169,12 @@ void loop() {
     Serial.println("Humidity and Temperature sensor off !");
   }
   if (userOrder == 4) {
-    delay(1000);
+    //delay(1000);
     o3Serial.print('\r');
+    //while(!o3Serial.available()){
+      
+    //}
+    delay(1000);
     if (o3Serial.available()) {
         dataString = o3Serial.readStringUntil('\n');
         Serial.println("********************************************************************");
@@ -186,7 +190,8 @@ void loop() {
         Serial.print (H2S);
         Serial.println (" ppb");
       }
-    userOrder=0;
+    userOrder=0;//
+    Serial.println("O3 sensor off");
   }
   
 }

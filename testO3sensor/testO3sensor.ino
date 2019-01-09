@@ -44,6 +44,7 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
+  dataString.reserve(50);
   Serial.println("Start Sensor");
 
   // set the data rate for the SoftwareSerial port
@@ -62,8 +63,9 @@ void loop() { // run over and over
     dataString = o3Serial.readStringUntil('\n'); */
     userOrder=1;
     while(userOrder) {
-      
-      if (o3Serial.available()) {
+      int test=o3Serial.available();
+      Serial.println(test);
+      if (test) {
         dataString = o3Serial.readStringUntil('\n');
         userOrder=0;
       }
@@ -73,7 +75,7 @@ void loop() { // run over and over
       }
     }
     Serial.println("********************************************************************");
-    //Serial.println(*dataString);
+    Serial.println(dataString);
     int idx1 = dataString.indexOf(',');    
     int idx2 = dataString.indexOf(',', idx1 + 1);
     

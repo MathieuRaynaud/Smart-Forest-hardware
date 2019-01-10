@@ -70,7 +70,7 @@ byte userOrder = 1;    // User input order on the serial command
 
 
 // Sleep parameters
-#define MAX_SLEEP_ITERATIONS 225
+#define MAX_SLEEP_ITERATIONS 2
 int sleepIterations = 0;
 volatile bool watchdogActivated = false;
 
@@ -152,7 +152,6 @@ void setup() {
   // Enable interrupts again.
   interrupts();
 
-  Serial.println(F("Setup complete."));
 
   pinMode(ledPIN, OUTPUT);
   digitalWrite(ledPIN, HIGH);
@@ -163,6 +162,8 @@ void setup() {
   delay(500);
   digitalWrite(ledPIN, LOW);
   delay(500);
+
+  Serial.println(F("Setup complete."));
 
 }
 
@@ -176,7 +177,10 @@ void loop() {
     // Increase the count of sleep iterations and take a sensor
     // reading once the max number of iterations has been hit.
     sleepIterations += 1;
+      Serial.println("Awake");
+
     if (sleepIterations >= MAX_SLEEP_ITERATIONS) {
+      Serial.println("Timer elapsed");
       // Reset the number of sleep iterations.
       sleepIterations = 0;
       // read the value from the sensor:

@@ -5,8 +5,6 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
 
-#define DEBUG 1 //if you want to print on the serial monitor
-#define ledPIN 5 //DEBUG led
 
 // Id of the Weather Station :
 byte IdWSByte = 0x01;
@@ -25,41 +23,44 @@ byte tempHRByte[4];
 #define LoRaTX 7
 SoftwareSerial loraSerial(LoRaRX, LoRaTX);
 #define freqPlan TTN_FP_EU868
-/*const char *devAddr = "26011974";
-const char *nwkSKey = "0FD4DF821371856F6690C46E428FA4A5";
-const char *appSKey = "6EDCCF62E148D4CB5070040ADAA6CA66";*/ //TTN
-
+const char *devAddr = "26011B55";
+const char *nwkSKey = "F31339A17B955BC04FA7421D579AFC13";
+const char *appSKey = "D0D5B702CAB536B55187ABD55A7827E6"; //TTN
+/*
   const char *devAddr = "f9e038b9";
   const char *nwkSKey = "3de6ac4540fca46c0c4a871ff583f30b";
-  const char *appSKey = "17d6b299b3f0e5db8fcbca3205ccd588"; //LoRa Server
+  const char *appSKey = "17d6b299b3f0e5db8fcbca3205ccd588"; //LoRa Server*/
   
-TheThingsNetwork ttn(loraSerial, Serial, freqPlan);
+TheThingsNetwork ttn(loraSerial, Serial, freqPlan); //Declaration of the software serial (RX,TX)
 byte data_Sensors[9];  //Payload for the sensor values
 byte data_GPS[12];     //Payload for the GPS values
 
+
 // Temperature and Humidity sensor connexion
-// A4 (SDA), A5 (SCL)
+// Sensor <-> Arduino
+// SDA <-> A4
+// SCL <-> A5
 int deviceAddress = 39;    // device number 39 or 0x27
 byte readI2C;
 
 // Ozone Sensor connexion
 // Sensor <-> Arduino
 // TXD <-> 8
-// RXD <-> Voltage Diviser Bridge, 9
+// RXD <-> Voltage Diviser Bridge <-> 9
 // 3V3 and GND
 #define o3RXpin 8
 #define o3TXpin 9
-SoftwareSerial o3Serial(o3RXpin, o3TXpin); // RX, TX
+SoftwareSerial o3Serial(o3RXpin, o3TXpin); //Declaration of the software serial (RX,TX)
 String S_gas;
 long H2S;
 String dataString = "";
 
 
 
-// GPS connexion :
+// GPS Module connexion
 //   Connect the GPS TX (transmit) pin to Digital 10
 //   Connect the GPS RX (receive) pin to Digital 11
-
+#define GPSTransistorPin 5
 String Header;
 String charFix;
 String Latitude;
@@ -71,14 +72,15 @@ String Altitude;
 byte idx1, idx2, idx3, idx4, idx5, idx6, idx7, idx8, idx9, idx10;
 
 
+//Light Sensor connexion
 #define lightSensor A0    // select the input pin for the potentiometer
 int lightSensorValue = 0; //declare the variable to store the value read by the ADC
 byte userOrder = 1;    // User input order on the serial command
 
 
 // Sleep parameters
-#define MAX_SLEEP_ITERATIONS 2 // Every 225*8s=30min
-#define MAX_POS_ITERATIONS 2 // Every 48*30min=24h
+#define MAX_SLEEP_ITERATIONS 2 // Every 450*8s=1h
+#define MAX_POS_ITERATIONS 2 // Every 24*1h=24h
 int sleepIterations = 0;
 int posIterations = 0;
 volatile bool watchdogActivated = false;
@@ -120,6 +122,7 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
+  dataString.reserve(100);
 
   //Reset RN2483 for init
   pinMode(pinRST, OUTPUT);
@@ -139,6 +142,10 @@ void setup() {
   pinMode(LoRaTX, OUTPUT);
   pinMode(o3TXpin, OUTPUT);
   //pinMode(GPSTXpin, OUTPUT);
+
+  //GPS transistor initialization
+  pinMode(GPSTransistorPin,OUTPUT);
+  digitalWrite(GPSTransistorPin,LOW);
 
 
   //Humidity and Temperature sensor initialization
@@ -162,16 +169,6 @@ void setup() {
   interrupts();
 
   Serial.println(F("Setup complete."));
-
-  pinMode(ledPIN, OUTPUT);
-  digitalWrite(ledPIN, HIGH);
-  delay(500);
-  digitalWrite(ledPIN, LOW);
-  delay(500);
-  digitalWrite(ledPIN, HIGH);
-  delay(500);
-  digitalWrite(ledPIN, LOW);
-  delay(500);
 
 }
 
@@ -336,6 +333,8 @@ void loop() {
         /* ######################### Getting GPS values ####################################*/
         //GPS initilization
         // start with the data rate and the timeout for the GPS SoftwareSerial port
+        digitalWrite(GPSTransistorPin,HIGH);
+        delay(500);
         Serial.begin(9600);
         Serial.setTimeout(2000);
         // to turn on RMC (recommended minimum) and GGA (fix data) including altitude
@@ -372,7 +371,7 @@ void loop() {
               idx9 = dataString.indexOf(',', idx8 + 1);
               idx10 = dataString.indexOf(',', idx9 + 1);
               Altitude = dataString.substring(idx9 + 1, idx10); //Recover the altitude
-
+              Serial.println(dataString);
               if (charFix[0] == '1' || charFix[0] == '2') { //if the GPS have a position
                 userOrder = 0;
               }
@@ -381,7 +380,7 @@ void loop() {
           else
             delay(200);
         }
-
+        digitalWrite(GPSTransistorPin,LOW);
         coordToHexa();
 
         userOrder = 3;

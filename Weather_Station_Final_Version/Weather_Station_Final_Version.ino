@@ -5,7 +5,6 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
 
-
 // Id of the Weather Station :
 byte IdWSByte = 0x01;
 
@@ -23,14 +22,10 @@ byte tempHRByte[4];
 #define LoRaTX 7
 SoftwareSerial loraSerial(LoRaRX, LoRaTX);
 #define freqPlan TTN_FP_EU868
+//TTN identification parameters
 const char *devAddr = "26011B55";
 const char *nwkSKey = "F31339A17B955BC04FA7421D579AFC13";
-const char *appSKey = "D0D5B702CAB536B55187ABD55A7827E6"; //TTN
-/*
-  const char *devAddr = "f9e038b9";
-  const char *nwkSKey = "3de6ac4540fca46c0c4a871ff583f30b";
-  const char *appSKey = "17d6b299b3f0e5db8fcbca3205ccd588"; //LoRa Server*/
-  
+const char *appSKey = "D0D5B702CAB536B55187ABD55A7827E6";   
 TheThingsNetwork ttn(loraSerial, Serial, freqPlan); //Declaration of the software serial (RX,TX)
 byte data_Sensors[9];  //Payload for the sensor values
 byte data_GPS[12];     //Payload for the GPS values
@@ -54,8 +49,6 @@ SoftwareSerial o3Serial(o3RXpin, o3TXpin); //Declaration of the software serial 
 String S_gas;
 long H2S;
 String dataString = "";
-
-
 
 // GPS Module connexion
 //   Connect the GPS TX (transmit) pin to Digital 10
@@ -205,64 +198,6 @@ void loop() {
         lightByte[1] = lightSensorValue;
         lightByte[0] = lightSensorValue >> 8;
 
-        /* ######################### Getting GPS values ####################################*/
-        /*
-        //GPS initilization
-        // start with the data rate and the timeout for the GPS SoftwareSerial port
-        Serial.begin(9600);
-        Serial.setTimeout(2000);
-        // to turn on RMC (recommended minimum) and GGA (fix data) including altitude
-        Serial.println("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
-        // Set the update rate at 1 Hz
-        Serial.println("$PMTK220,1000*1F");
-        // Request updates on antenna status, comment out to keep quiet
-        //Serial.println("$PGCMD,33,1*6C");
-
-        userOrder = 1; //use the variable as a boolean
-        delay(2000);
-        //While the position is not found
-        while (userOrder == 1) {
-
-          if (Serial.available()) { //if the string is available
-            dataString = Serial.readStringUntil('\n'); //read the string from the GPS
-            idx1 = dataString.indexOf(',');
-            Header = dataString.substring(0, idx1);
-
-            if (Header[4] == 'G') { //in order to select only the $GPGGA frame and not the $GPRMC frame
-
-              idx2 = dataString.indexOf(',', idx1 + 1);
-              idx3 = dataString.indexOf(',', idx2 + 1);
-              Latitude = dataString.substring(idx2 + 1, idx3); //Recover the Latitude
-              idx4 = dataString.indexOf(',', idx3 + 1);
-              DirectionLatitude = dataString.substring(idx3 + 1, idx4); //Recover the Direction of Latitude
-              idx5 = dataString.indexOf(',', idx4 + 1);
-              Longitude = dataString.substring(idx4 + 1, idx5); //Recover the Longitude
-              idx6 = dataString.indexOf(',', idx5 + 1);
-              DirectionLongitude = dataString.substring(idx5 + 1, idx6); //Recover the Direction of Longitude
-              idx7 = dataString.indexOf(',', idx6 + 1);
-              charFix = dataString.substring(idx6 + 1, idx7); //Recover the fix quality value
-              idx8 = dataString.indexOf(',', idx7 + 1);
-              idx9 = dataString.indexOf(',', idx8 + 1);
-              idx10 = dataString.indexOf(',', idx9 + 1);
-              Altitude = dataString.substring(idx9 + 1, idx10); //Recover the altitude
-
-              if (charFix[0] == '1' || charFix[0] == '2') { //if the GPS have a position
-                userOrder = 0;
-              }
-            }
-          }
-          else
-            delay(200);
-        }
-
-        coordToHexa();
-
-        userOrder = 3;
-        Serial.end();
-        */
-
-
-
         /* ######################### Getting temperature and humidity values ####################################*/
         //delay(500) // Setting time if we use transistors to control the power
         Wire.beginTransmission(deviceAddress);
@@ -343,13 +278,10 @@ void loop() {
         GPSSerial.println("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
         // Set the update rate at 1 Hz
         GPSSerial.println("$PMTK220,1000*1F");
-        // Request updates on antenna status, comment out to keep quiet
-        //Serial.println("$PGCMD,33,1*6C");
 
         userOrder = 1; //use the variable as a boolean
         delay(500);
         //While the position is not found
-        Serial.println("Start reading GPS");
         while (userOrder == 1) {
 
           if (GPSSerial.available()) { //if the string is available
@@ -386,7 +318,6 @@ void loop() {
         }
         digitalWrite(GPSTransistorPin,LOW);
         GPSSerial.end();
-        Serial.println("");
         coordToHexa(); 
 
         userOrder = 3;
@@ -420,12 +351,9 @@ void loop() {
       }
     }
   }
-
 }
 
-void coordToHexa() { //String AltitudeString, String LongitudeString, String LatitudeString
-
-  
+void coordToHexa() { 
   String tmp = "";
   tmp.concat(Latitude[0]);
   tmp.concat(Latitude[1]);
@@ -454,35 +382,7 @@ void coordToHexa() { //String AltitudeString, String LongitudeString, String Lat
   tmp.concat(Longitude[8]);
   tmp.concat(Longitude[9]);
   long LongiMinutes = tmp.toInt();
-  long alti = Altitude.toInt(); //String
-//  long longi = Longitude.toInt();
-//  long lati = Latitude.toInt();
-//  
-//  float longitudeFloat = (longi-100*int(longi/100))/60.0;
-//  longitudeFloat += int(longi/100);
-//
-//  float latitudeFloat = (lati-100*int(lati/100))/60.0;
-//  latitudeFloat += int(lati/100);
-//
-//  long LatiDegrees = (int) latitudeFloat;
-//  long LatiMinutes = (latitudeFloat - LatiDegrees)*10000;
-//
-//  long LongiDegrees = (int) longitudeFloat;
-//  long LongiMinutes = (longitudeFloat - LongiDegrees)*10000;
-
-  /*
-  Serial.print("Latitude Real : ");
-  Serial.println(lati);
-  Serial.print("Longitude Real : ");
-  Serial.println(longi);
-  Serial.print("Latitude degrees: ");
-  Serial.println(LatiDegrees);
-  Serial.print("Latitude minutes: ");
-  Serial.println(LatiMinutes);
-  Serial.print("Longitude degrees: ");
-  Serial.println(LongiDegrees);
-  Serial.print("Longitude minutes: ");
-  Serial.println(LongiMinutes);*/
+  long alti = Altitude.toInt(); 
 
   latiByte[3] = LatiMinutes;
   latiByte[2] = LatiMinutes >> 8;
@@ -503,5 +403,4 @@ void coordToHexa() { //String AltitudeString, String LongitudeString, String Lat
 
   altitudeByte[1] = alti;
   altitudeByte[0] = alti >> 8;
-
 }

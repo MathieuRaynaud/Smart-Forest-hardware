@@ -1,8 +1,6 @@
 # Smart-Forest-hardware
 
-All the Arduino program for the weather stations.
-All the pin connection is explained in the comments of the Arduino program.
-You have also all the test programs for the different sensors.
+All the Arduino program for the weather stations. All the pin connection is explained in the comments of the Arduino program. You have also all the test programs for the different sensors and also all the previous version of the weather station program.
 
 ## The weather stations use the following sensors:
 - **Temperature and Humidity sensor** which uses I2C communication.
